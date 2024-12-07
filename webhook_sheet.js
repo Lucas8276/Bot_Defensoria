@@ -1,6 +1,6 @@
 const { google } = require("googleapis");
 const sheets = google.sheets("v4");
-const config = require('./doc_sheet'); // Asegúrate de que este archivo contenga el ID de la hoja
+const config = require('/doc_sheet'); // Asegúrate de que este archivo contenga el ID de la hoja
 
 module.exports = async (req, res) => {
   console.log("Webhook recibido", req.body);  // Verifica que se recibe la solicitud correctamente
@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
 
   // Configurar autenticación con la API de Google Sheets
   const auth = new google.auth.GoogleAuth({
-    keyFile: "./prueba-fpgt-62b3ef880b1e.json",
+    keyFile: "/prueba-fpgt-62b3ef880b1e.json",
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
 

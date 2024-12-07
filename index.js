@@ -39,7 +39,7 @@ app.post("/webhook", async (req, res) => {
 
   // Configurar autenticación con la API de Google Sheets
   const auth = new google.auth.GoogleAuth({
-    keyFile: "./prueba-fpgt-62b3ef880b1e.json", // Cambiar si es necesario o usar variables de entorno
+    credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON), // Usar el JSON de las credenciales desde la variable de entorno
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
 

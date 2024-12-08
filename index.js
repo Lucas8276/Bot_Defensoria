@@ -63,8 +63,8 @@ app.post("/webhook", async (req, res) => {
         return;
       }
       
-      const nombreCompleto = context.parameters.nombreCompleto || "";
-      const documento = context.parameters.documento || "";
+      const nombreCompleto = context.parameters.nombreCompleto ;
+      const documento = context.parameters.documento ;
       let additionalData = "Área no especificada";
     
       // Validar y asignar additionalData según el intent recibido

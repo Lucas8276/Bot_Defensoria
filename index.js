@@ -51,17 +51,21 @@ app.post("/webhook", async (req, res) => {
 
   if (intentName === "Consultas") {
     const { nombreCompleto, documento } = req.body.queryResult.parameters;
-    console.log("Parámetros recibidos:", { nombreCompleto, documento });}
-    else if (intentName.startsWith("Consultas -")) {
+    console.log("Parámetros recibidos:", { nombreCompleto, documento });
+  } else if (intentName.startsWith("Consultas -")) {
       // Extraer los contextos de salida
       const context = req.body.queryResult.outputContexts.find((c) =>
         c.name.includes("consulta_context")
       );
-    
-      // Asegúrate de extraer correctamente los parámetros del contexto
-      const nombreCompleto = context?.parameters?.nombreCompleto || "";
-      const documento = context?.parameters?.documento || "";
-      let additionalData = "";
+      if (!context || !context.parameters) {
+        console.error("Contexto o parámetros no encontrados.");
+        res.json({ fulfillmentText: "Hubo un error al procesar tu solicitud." });
+        return;
+      }
+      
+      const nombreCompleto = context.parameters.nombreCompleto || "";
+      const documento = context.parameters.documento || "";
+      let additionalData = "Área no especificada";
     
       // Validar y asignar additionalData según el intent recibido
       if (intentName === "Consultas - Servicios Publicos-4") {

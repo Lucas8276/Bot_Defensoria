@@ -30,17 +30,21 @@ app.post("/webhook", async (req, res) => {
 
   let additionalData = "Área no especificada";
 
-  // Determina el área según la intención
-  if (intentName === "Consultas - Servicios Públicos-4") {
-    additionalData = "Servicios Públicos";
-  } else if (intentName === "Consultas - Defensa del consumidor-1") {
-    additionalData = "Defensa del Consumidor";
-  } else if (intentName === "Consultas - Juventud-3") {
-    additionalData = "Juventud";
-  } else if (intentName === "Consultas - Defensoría Itinerante-5") {
-    additionalData = "Defensoría Itinerante";
-  } else if (intentName === "Consultas - Derechos De Inquilinos-2") {
-    additionalData = "Derechos de Inquilinos";
+  // Verificar la intención principal "Consultas" y sus follow-up intents
+  if (intentName.startsWith("Consultas")) {
+    if (intentName === "Consultas - Servicios Públicos-4") {
+      additionalData = "Servicios Públicos";
+    } else if (intentName === "Consultas - Defensa del consumidor-1") {
+      additionalData = "Defensa del Consumidor";
+    } else if (intentName === "Consultas - Juventud-3") {
+      additionalData = "Juventud";
+    } else if (intentName === "Consultas - Defensoría Itinerante-5") {
+      additionalData = "Defensoría Itinerante";
+    } else if (intentName === "Consultas - Derechos De Inquilinos-2") {
+      additionalData = "Derechos de Inquilinos";
+    } else {
+      additionalData = "Área General";
+    }
   }
 
   try {

@@ -14,7 +14,23 @@ app.post("/webhook", async (req, res) => {
   console.log("Parametros completos recibidos:", JSON.stringify(req.body.queryResult.parameters, null, 2));
 
   // Obtener los parámetros desde la intención correctamente
-  const { nombreCompleto, documento } = req.body.queryResult.parameters;
+  let nombreCompleto = req.body.queryResult.parameters.nombreCompleto || '';
+  let documento = req.body.queryResult.parameters.documento || '';
+
+  // Verificar si los parámetros no están en los parámetros directos, buscar en los contexts
+  if (!nombreCompleto || !documento) {
+    const contexts = req.body.queryResult.outputContexts || [];
+    contexts.forEach((context) => {
+      const params = context.parameters;
+      if (!nombreCompleto && params.nombreCompleto) {
+        nombreCompleto = params.nombreCompleto;
+      }
+      if (!documento && params.documento) {
+        documento = params.documento;
+      }
+    });
+  }
+
   console.log("Parámetros extraídos:", { nombreCompleto, documento });
 
   if (!nombreCompleto || !documento) {

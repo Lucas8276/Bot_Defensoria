@@ -52,22 +52,29 @@ app.post("/webhook", async (req, res) => {
   if (intentName === "Consultas") {
     const { nombreCompleto, documento } = req.body.queryResult.parameters;
     console.log("Parámetros recibidos:", { nombreCompleto, documento });}
-  else if (intentName.startsWith("Consultas -")) {
-    if (intentName === "Consultas - Servicios Publicos-4") {
-      additionalData = "Servicios Públicos";
-    } else if (intentName === "Consultas - Defensa del consumidor-1") {
-      additionalData = "Defensa del Consumidor";
-    } else if (intentName === "Consultas - Juventud-3") {
-      additionalData = "Juventud";
-    } else if (intentName === "Consultas - Defensoría Itinerante-5") {
-      additionalData = "Defensoría Itinerante";
-    } else if (intentName === "Consultas - Derechos De Inquilinos-2") {
-      additionalData = "Derechos de Inquilinos";
-    } else {
-      console.error("Intent no reconocido:", intentName);
-      res.json({ fulfillmentText: "Área no reconocida. Por favor, intenta nuevamente." });
-      return;
-  }
+    else if (intentName.startsWith("Consultas -")) {
+      // Extraer los contextos de salida
+      const context = req.body.queryResult.outputContexts.find((c) =>
+        c.name.includes("consulta_context")
+      );
+    
+      // Asegúrate de extraer correctamente los parámetros del contexto
+      const nombreCompleto = context?.parameters?.nombreCompleto || "";
+      const documento = context?.parameters?.documento || "";
+      let additionalData = "";
+    
+      // Validar y asignar additionalData según el intent recibido
+      if (intentName === "Consultas - Servicios Publicos-4") {
+        additionalData = "Servicios Públicos";
+      } else if (intentName === "Consultas - Defensa del consumidor-1") {
+        additionalData = "Defensa del Consumidor";
+      } else if (intentName === "Consultas - Juventud-3") {
+        additionalData = "Juventud";
+      } else if (intentName === "Consultas - Defensoría Itinerante-5") {
+        additionalData = "Defensoría Itinerante";
+      } else if (intentName === "Consultas - Derechos De Inquilinos-2") {
+        additionalData = "Derechos de Inquilinos";
+      } 
     try {
       const client = await auth.getClient();
       console.log("Cliente autenticado correctamente.");

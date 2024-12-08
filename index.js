@@ -49,73 +49,57 @@ app.post("/webhook", async (req, res) => {
   const intentName = req.body.queryResult.intent.displayName;
   console.log("Intent recibido:", intentName);
 
-  if (intentName === "Consultas") {
-    const { nombreCompleto, documento } = req.body.queryResult.parameters;
-    console.log("Parámetros recibidos:", { nombreCompleto, documento });
-  } else if (intentName.startsWith("Consultas -")) {
-    // Imprimir todos los contextos para depurar
-    console.log("Output contexts:", req.body.queryResult.outputContexts);
+  // Obtener los parámetros directamente desde la intención
+  const { nombreCompleto, documento } = req.body.queryResult.parameters;
+  console.log("Parámetros recibidos:", { nombreCompleto, documento });
 
-    // Extraer el contexto específico
-    const context = req.body.queryResult.outputContexts.find((c) =>
-      c.name.includes("consultas-derechosdeinquilinos-followup")
-    );
-    console.log("Contexto encontrado:", context);  // Verifica que encontramos el contexto correcto
+  // Validación para asegurarse de que los parámetros existen
+  if (!nombreCompleto || !documento) {
+    console.log("Faltan parámetros: nombreCompleto o documento no encontrados.");
+    res.json({ fulfillmentText: "Faltan parámetros requeridos. Por favor, intenta nuevamente." });
+    return;
+  }
 
-    if (context && context.parameters) {
-      const nombreCompleto = context.parameters.nombreCompleto || "No especificado";
-      const documento = context.parameters.documento || "No especificado";
-      console.log("Parámetros encontrados:", { nombreCompleto, documento });
+  let additionalData = "Área no especificada";
 
-      let additionalData = "Área no especificada";
+  // Validar y asignar additionalData según el intent recibido
+  if (intentName === "Consultas - Servicios Públicos-4") {
+    additionalData = "Servicios Públicos";
+  } else if (intentName === "Consultas - Defensa del consumidor-1") {
+    additionalData = "Defensa del Consumidor";
+  } else if (intentName === "Consultas - Juventud-3") {
+    additionalData = "Juventud";
+  } else if (intentName === "Consultas - Defensoría Itinerante-5") {
+    additionalData = "Defensoría Itinerante";
+  } else if (intentName === "Consultas - Derechos De Inquilinos-2") {
+    additionalData = "Derechos de Inquilinos";
+  }
 
-      // Validar y asignar additionalData según el intent recibido
-      if (intentName === "Consultas - Servicios Públicos-4") {
-        additionalData = "Servicios Públicos";
-      } else if (intentName === "Consultas - Defensa del consumidor-1") {
-        additionalData = "Defensa del Consumidor";
-      } else if (intentName === "Consultas - Juventud-3") {
-        additionalData = "Juventud";
-      } else if (intentName === "Consultas - Defensoría Itinerante-5") {
-        additionalData = "Defensoría Itinerante";
-      } else if (intentName === "Consultas - Derechos De Inquilinos-2") {
-        additionalData = "Derechos de Inquilinos";
-      }
+  try {
+    const client = await auth.getClient();
+    console.log("Cliente autenticado correctamente.");
 
-      try {
-        const client = await auth.getClient();
-        console.log("Cliente autenticado correctamente.");
+    const valores = [[nombreCompleto, documento, additionalData]];
 
-        const valores = [[nombreCompleto, documento, additionalData]];
+    // Agregar log para verificar los datos antes de escribir
+    console.log("Valores a escribir en Google Sheets:", valores);
 
-        // Agregar log para verificar los datos antes de escribir
-        console.log("Valores a escribir en Google Sheets:", valores);
+    // Escribir en Google Sheets
+    await sheets.spreadsheets.values.append({
+      auth: client,
+      spreadsheetId: SPREADSHEET_ID,
+      range: "Hoja 1!A:C", // Asegúrate de que la hoja y el rango sean correctos
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: valores,
+      },
+    });
 
-        // Escribir en Google Sheets
-        await sheets.spreadsheets.values.append({
-          auth: client,
-          spreadsheetId: SPREADSHEET_ID,
-          range: "Hoja 1!A:C", // Asegúrate de que la hoja y el rango sean correctos
-          valueInputOption: "USER_ENTERED",
-          requestBody: {
-            values: valores,
-          },
-        });
-
-        console.log("Datos escritos en Google Sheets.");
-        res.status(200).end();
-      } catch (error) {
-        console.error("Error al escribir en Google Sheets:", error);
-        res.json({ fulfillmentText: "Hubo un error al guardar los datos." });
-      }
-    } else {
-      console.error("Contexto o parámetros no encontrados.");
-      res.json({ fulfillmentText: "Hubo un error al procesar tu solicitud." });
-      return;
-    }
-  } else {
-    console.log("Intención no manejada:", intentName);
-    res.json({ fulfillmentText: "Intención no manejada." });
+    console.log("Datos escritos en Google Sheets.");
+    res.status(200).end();
+  } catch (error) {
+    console.error("Error al escribir en Google Sheets:", error);
+    res.json({ fulfillmentText: "Hubo un error al guardar los datos." });
   }
 });
 

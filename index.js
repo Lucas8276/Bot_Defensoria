@@ -83,6 +83,12 @@ app.post("/webhook", async (req, res) => {
       const client = await auth.getClient();
       console.log("Cliente autenticado correctamente.");
 
+      const valores = [[nombreCompleto, documento, additionalData]];
+
+      // Agregar log para verificar los datos antes de escribir
+      console.log("Valores a escribir en Google Sheets:", valores);
+
+
       // Escribir en Google Sheets
       await sheets.spreadsheets.values.append({
         auth: client,

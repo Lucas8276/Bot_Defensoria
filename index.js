@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 const sheets = google.sheets("v4");
 
 app.post("/webhook", async (req, res) => {
-  console.log("Webhook recibido", req.body);  // Verifica que se recibe la solicitud correctamente
+  console.log("Webhook recibido", req.body);
 
   // Autenticación básica (si se desea mantener)
   const authHeader = req.headers.authorization;
@@ -49,8 +49,9 @@ app.post("/webhook", async (req, res) => {
   const intentName = req.body.queryResult.intent.displayName;
   console.log("Intent recibido:", intentName);
 
-  // Obtener los parámetros directamente desde la intención
+  // Obtener los parámetros desde la intención correctamente
   const { nombreCompleto, documento } = req.body.queryResult.parameters;
+
   console.log("Parámetros recibidos:", { nombreCompleto, documento });
 
   // Validación para asegurarse de que los parámetros existen

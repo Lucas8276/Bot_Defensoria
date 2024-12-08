@@ -53,22 +53,24 @@ app.post("/webhook", async (req, res) => {
     const { nombreCompleto, documento } = req.body.queryResult.parameters;
     console.log("Parámetros recibidos:", { nombreCompleto, documento });
   } else if (intentName.startsWith("Consultas -")) {
-      // Extraer los contextos de salida
-      const context = req.body.queryResult.outputContexts.find((c) =>
-        c.name.includes("consultas-derechosdeinquilinos-followup")
-      );
-      if (!context || !context.parameters) {
-        console.error("Contexto o parámetros no encontrados.");
-        res.json({ fulfillmentText: "Hubo un error al procesar tu solicitud." });
-        return;
-      }
-      
-      const nombreCompleto = context.parameters.nombreCompleto ;
-      const documento = context.parameters.documento ;
+    // Imprimir todos los contextos para depurar
+    console.log("Output contexts:", req.body.queryResult.outputContexts);
+
+    // Extraer el contexto específico
+    const context = req.body.queryResult.outputContexts.find((c) =>
+      c.name.includes("consultas-derechosdeinquilinos-followup")
+    );
+    console.log("Contexto encontrado:", context);  // Verifica que encontramos el contexto correcto
+
+    if (context && context.parameters) {
+      const nombreCompleto = context.parameters.nombreCompleto || "No especificado";
+      const documento = context.parameters.documento || "No especificado";
+      console.log("Parámetros encontrados:", { nombreCompleto, documento });
+
       let additionalData = "Área no especificada";
-    
+
       // Validar y asignar additionalData según el intent recibido
-      if (intentName === "Consultas - Servicios Publicos-4") {
+      if (intentName === "Consultas - Servicios Públicos-4") {
         additionalData = "Servicios Públicos";
       } else if (intentName === "Consultas - Defensa del consumidor-1") {
         additionalData = "Defensa del Consumidor";
@@ -78,33 +80,38 @@ app.post("/webhook", async (req, res) => {
         additionalData = "Defensoría Itinerante";
       } else if (intentName === "Consultas - Derechos De Inquilinos-2") {
         additionalData = "Derechos de Inquilinos";
-      } 
-    try {
-      const client = await auth.getClient();
-      console.log("Cliente autenticado correctamente.");
+      }
 
-      const valores = [[nombreCompleto, documento, additionalData]];
+      try {
+        const client = await auth.getClient();
+        console.log("Cliente autenticado correctamente.");
 
-      // Agregar log para verificar los datos antes de escribir
-      console.log("Valores a escribir en Google Sheets:", valores);
+        const valores = [[nombreCompleto, documento, additionalData]];
 
+        // Agregar log para verificar los datos antes de escribir
+        console.log("Valores a escribir en Google Sheets:", valores);
 
-      // Escribir en Google Sheets
-      await sheets.spreadsheets.values.append({
-        auth: client,
-        spreadsheetId: SPREADSHEET_ID,
-        range: "Hoja 1!A:C", // Asegúrate de que la hoja y el rango sean correctos
-        valueInputOption: "USER_ENTERED",
-        requestBody: {
-          values: [[nombreCompleto, documento, additionalData]],
-        },
-      });
+        // Escribir en Google Sheets
+        await sheets.spreadsheets.values.append({
+          auth: client,
+          spreadsheetId: SPREADSHEET_ID,
+          range: "Hoja 1!A:C", // Asegúrate de que la hoja y el rango sean correctos
+          valueInputOption: "USER_ENTERED",
+          requestBody: {
+            values: valores,
+          },
+        });
 
-      console.log("Datos escritos en Google Sheets.");
-      res.status(200).end();
-    } catch (error) {
-      console.error("Error al escribir en Google Sheets:", error);
-      res.json({ fulfillmentText: "Hubo un error al guardar los datos." });
+        console.log("Datos escritos en Google Sheets.");
+        res.status(200).end();
+      } catch (error) {
+        console.error("Error al escribir en Google Sheets:", error);
+        res.json({ fulfillmentText: "Hubo un error al guardar los datos." });
+      }
+    } else {
+      console.error("Contexto o parámetros no encontrados.");
+      res.json({ fulfillmentText: "Hubo un error al procesar tu solicitud." });
+      return;
     }
   } else {
     console.log("Intención no manejada:", intentName);

@@ -55,7 +55,7 @@ app.post("/webhook", async (req, res) => {
   } else if (intentName.startsWith("Consultas -")) {
       // Extraer los contextos de salida
       const context = req.body.queryResult.outputContexts.find((c) =>
-        c.name.includes("consulta_context")
+        c.name.includes("Consulta-")
       );
       if (!context || !context.parameters) {
         console.error("Contexto o parámetros no encontrados.");

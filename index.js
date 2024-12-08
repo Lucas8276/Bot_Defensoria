@@ -73,8 +73,11 @@ app.post("/webhook", async (req, res) => {
     const client = await auth.getClient();
     console.log("Cliente autenticado correctamente.");
 
+    const fechaActual = new Date().toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" });
+
+
     // Preparar los valores para insertar en Google Sheets
-    const valores = [[nombreCompleto, documento, additionalData]];
+    const valores = [[nombreCompleto, documento, additionalData,fechaActual]];
 
     console.log("Valores a escribir en Google Sheets:", valores);
 
@@ -85,7 +88,7 @@ app.post("/webhook", async (req, res) => {
     await sheets.spreadsheets.values.append({
       auth: client,
       spreadsheetId: SPREADSHEET_ID,
-      range: "Hoja 1!A:C", // Asegúrate de que el rango sea correcto
+      range: "Hoja 1!A:D", // Asegúrate de que el rango sea correcto
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: valores,

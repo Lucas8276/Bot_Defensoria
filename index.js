@@ -83,10 +83,10 @@ app.post("/webhook", async (req, res) => {
       await sheets.spreadsheets.values.append({
         auth: client,
         spreadsheetId: SPREADSHEET_ID,
-        range: "Hoja 1!A:B", // Asegúrate de que la hoja y el rango sean correctos
+        range: "Hoja 1!A:C", // Asegúrate de que la hoja y el rango sean correctos
         valueInputOption: "USER_ENTERED",
         requestBody: {
-          values: [[nombreCompleto, documento]],
+          values: [[nombreCompleto, documento, additionalData]],
         },
       });
 

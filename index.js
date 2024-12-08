@@ -69,7 +69,7 @@ app.post("/webhook", async (req, res) => {
       });
 
       console.log("Datos escritos en Google Sheets.");
-      res.json({ fulfillmentText: "Los datos se han guardado exitosamente." });
+      res.status(200).end();
     } catch (error) {
       console.error("Error al escribir en Google Sheets:", error);
       res.json({ fulfillmentText: "Hubo un error al guardar los datos." });

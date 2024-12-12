@@ -11,7 +11,9 @@
   "description": "",
   "dependencies": {
     "body-parser": "^1.20.3",
+    "bot_defensoria": "file:",
     "express": "^4.21.2",
-    "googleapis": "^144.0.0"
+    "googleapis": "^144.0.0",
+    "mysql2": "^3.11.5"
   }
 }

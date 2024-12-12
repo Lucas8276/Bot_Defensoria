@@ -2,6 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { google } = require("googleapis");
 
+const pool = require("./db"); // Importa la conexión a la base de datos
+
 const app = express();
 app.use(bodyParser.json());
 
@@ -11,7 +13,7 @@ app.post("/webhook", async (req, res) => {
   console.log("Webhook recibido", req.body);
 
   // Imprimir todos los parámetros para depuración
-  console.log("Parametros completos recibidos:", JSON.stringify(req.body.queryResult.parameters, null, 2));
+  console.log("Parámetros completos recibidos:", JSON.stringify(req.body.queryResult.parameters, null, 2));
 
   // Obtener los parámetros desde la intención correctamente
   let nombreCompleto = req.body.queryResult.parameters.nombreCompleto || '';
@@ -93,10 +95,16 @@ app.post("/webhook", async (req, res) => {
     });
 
     console.log("Datos escritos en Google Sheets.");
+
+    // *** INSERTAR DATOS EN MySQL ***
+    const sql = `INSERT INTO registros (nombre, documento, area) VALUES (?, ?, ?)`;
+    await pool.query(sql, [nombreCompleto, documento, additionalData]);
+
+    console.log("Datos guardados en MySQL.");
     res.status(200).end();
   } catch (error) {
-    console.error("Error al escribir en Google Sheets:", error);
-    res.json({ fulfillmentText: "Hubo un error al guardar los datos." });
+    console.error("Error durante el proceso:", error);
+    res.json({ fulfillmentText: "Hubo un error al procesar los datos." });
   }
 });
 
